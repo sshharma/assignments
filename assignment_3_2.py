@@ -3,6 +3,7 @@ import pyterrier as pt
 if not pt.started():
     pt.init()
 
+
 # Loading TREC dataset =========================================================
 dataset = pt.datasets.get_dataset("irds:beir/trec-covid")
 # dataset.info
@@ -23,8 +24,17 @@ else:
 
 index = pt.IndexFactory.of(index_ref)
 
+
 # Runnnig BM25 Retriever =======================================================
-bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25")
+bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
+pt.GridSearch(
+    BM25,
+    {BM25 : {"c" : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ],
+             "bm25.k_1" : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ],
+             "bm25.k_3" : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ]}},
+train_topics,
+train_qrels,
+"map")
 topics = dataset.get_topics('query')
 
 res = bm25.transform(topics)
@@ -33,26 +43,15 @@ res
 # Evaluating ===================================================================
 qrels = dataset.get_qrels()
 
-eval_metrics = ['P_10', 'ndcg_cut_10', 'map']
+eval_metrics=['P_10', 'ndcg_cut_10', 'map']
 exp_res = pt.Experiment(
     [bm25],
     topics,
     qrels,
     eval_metrics=eval_metrics,
 )
-print(exp_res)
+exp_res
 
-# Adding RM3 for Query Expansion ================================================
-# Apply RM3 for query expansion
-bm25_rm3 = bm25 >> pt.rewrite.RM3(index)
-
-exp_res_rm3 = pt.Experiment(
-    [bm25_rm3],
-    topics,
-    qrels,
-    eval_metrics=eval_metrics,
-)
-print(exp_res_rm3)
 
 # Assignment Starts from here ==================================================
 # Re-ranking with MonoT5 =======================================================
@@ -62,14 +61,14 @@ from pyterrier_t5 import MonoT5ReRanker
 # Load the MonoT5 re-ranker
 monoT5 = pyterrier_t5.MonoT5ReRanker()
 
-# Apply BM25 + RM3 and then re-rank with MonoT5
-pipeline_rm3 = bm25_rm3 >> pt.text.get_text(dataset, "text") >> monoT5
+# Apply BM25 and then re-rank with MonoT5
+pipeline = bm25 >> pt.text.get_text(dataset, "text") >> monoT5
 
-exp_res_reranked_rm3 = pt.Experiment(
-    [pipeline_rm3],
+exp_res_reranked = pt.Experiment(
+    [pipeline],
     topics,
     qrels,
     eval_metrics=eval_metrics,
 )
 
-print(exp_res_reranked_rm3)
+print(exp_res_reranked)
