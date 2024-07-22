@@ -51,7 +51,6 @@ exp_res = pt.Experiment(
 exp_res
 print(f"baseline: {exp_res}")
 
-# Assignment Starts from here ==================================================
 # Re-ranking with MonoT5 =======================================================
 import pyterrier_t5
 from pyterrier_t5 import MonoT5ReRanker
