@@ -31,15 +31,13 @@ qrels = dataset.get_qrels()
 
 # bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
 bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.3, "bm25.k_1": 1.2, "bm25.k_3": 20})
-# pt.GridSearch(
-#     bm25,
-#     topics,
-#     qrels,
-#     "map",
-# )
+TF_IDF = pt.BatchRetrieve(index_ref, wmodel="TF_IDF")
+PL2 = pt.BatchRetrieve(index_ref, wmodel="PL2")
 
-res = bm25.transform(topics)
-res
+pipe = bm25 >> (TF_IDF ** PL2)
+
+res = pipe.transform(topics)
+print(f"BM25: {bm25.getControl('c')}, {bm25.getControl('bm25.k_1')}, {bm25.getControl('bm25.k_3')}")
 
 # Evaluating ===================================================================
 qrels = dataset.get_qrels()
@@ -52,6 +50,7 @@ exp_res = pt.Experiment(
     eval_metrics=eval_metrics,
 )
 exp_res
+print(f"baseline: {exp_res}")
 
 # Assignment Starts from here ==================================================
 # Re-ranking with MonoT5 =======================================================
@@ -71,4 +70,5 @@ exp_res_reranked = pt.Experiment(
     eval_metrics=eval_metrics,
 )
 
-print(exp_res_reranked)
+print("reranked: ", exp_res_reranked)
+
