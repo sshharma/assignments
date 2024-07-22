@@ -48,19 +48,16 @@ exp_res
 # Assignment Starts from here ==================================================
 # Re-ranking with MonoT5 =======================================================
 import pyterrier_t5
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-from pyterrier_t5 import MonoT5ReRanker, DuoT5ReRanker
+from pyterrier_t5 import MonoT5ReRanker
 
 # Load the MonoT5 re-ranker
 monoT5 = pyterrier_t5.MonoT5ReRanker()
-duoT5 = DuoT5ReRanker()
 
 # Apply BM25 and then re-rank with MonoT5
 pipeline = bm25 >> pt.text.get_text(dataset, "text") >> monoT5
-duo_pipeline = pipeline % 50 >> duoT5
 
 exp_res_reranked = pt.Experiment(
-    [duo_pipeline],
+    [pipeline],
     topics,
     qrels,
     eval_metrics=eval_metrics,
