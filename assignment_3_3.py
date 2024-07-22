@@ -30,7 +30,7 @@ topics = dataset.get_topics('query')
 qrels = dataset.get_qrels()
 
 # BM25 control configuration_1 ========================================================================================
-# bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
+bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
 # BM25 control configuration_2 ========================================================================================
 bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.3, "bm25.k_1": 1.2, "bm25.k_3": 20})
 TF_IDF = pt.BatchRetrieve(index_ref, wmodel="TF_IDF")
@@ -57,16 +57,18 @@ print(f"baseline: {exp_res}")
 # Assignment Starts from here ==================================================
 # Re-ranking with MonoT5 =======================================================
 import pyterrier_t5
-from pyterrier_t5 import MonoT5ReRanker
+from pyterrier_t5 import MonoT5ReRanker, DuoT5ReRanker
 
 # Load the MonoT5 re-ranker
 monoT5 = pyterrier_t5.MonoT5ReRanker()
+duoT5 = pyterrier_t5.DuoT5ReRanker()
 
 # Apply BM25 and then re-rank with MonoT5
 pipeline = bm25 >> pt.text.get_text(dataset, "text") >> monoT5
+duo_pipeline = pipeline % 50 >> duoT5
 
 exp_res_reranked = pt.Experiment(
-    [pipeline],
+    [duo_pipeline],
     topics,
     qrels,
     eval_metrics=eval_metrics,
