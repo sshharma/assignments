@@ -31,12 +31,12 @@ qrels = dataset.get_qrels()
 
 # bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
 bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.3, "bm25.k_1": 1.2, "bm25.k_3": 20})
-pt.GridSearch(
-    bm25,
-    topics,
-    qrels,
-    "map",
-)
+# pt.GridSearch(
+#     bm25,
+#     topics,
+#     qrels,
+#     "map",
+# )
 
 res = bm25.transform(topics)
 res
