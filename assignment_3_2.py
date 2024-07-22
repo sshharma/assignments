@@ -33,12 +33,9 @@ qrels = dataset.get_qrels()
 # bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
 # BM25 control configuration_2 ========================================================================================
 bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.3, "bm25.k_1": 1.2, "bm25.k_3": 20})
-TF_IDF = pt.BatchRetrieve(index_ref, wmodel="TF_IDF")
-PL2 = pt.BatchRetrieve(index_ref, wmodel="PL2")
 
-pipe = bm25 >> (TF_IDF ** PL2)
 
-res = pipe.transform(topics)
+res = bm25.transform(topics)
 # print(f"BM25: {bm25.getControl('c')}, {bm25.getControl('bm25.k_1')}, {bm25.getControl('bm25.k_3')}")
 
 # Evaluating ===================================================================
@@ -64,9 +61,14 @@ monoT5 = pyterrier_t5.MonoT5ReRanker()
 
 # Apply BM25 and then re-rank with MonoT5
 pipeline = bm25 >> pt.text.get_text(dataset, "text") >> monoT5
+TF_IDF = pt.BatchRetrieve(index_ref, wmodel="TF_IDF")
+PL2 = pt.BatchRetrieve(index_ref, wmodel="PL2")
+
+pipe = pipeline >> (TF_IDF ** PL2)
+
 
 exp_res_reranked = pt.Experiment(
-    [pipeline],
+    [pipe],
     topics,
     qrels,
     eval_metrics=eval_metrics,
