@@ -37,7 +37,7 @@ PL2 = pt.BatchRetrieve(index_ref, wmodel="PL2")
 pipe = bm25 >> (TF_IDF ** PL2)
 
 res = pipe.transform(topics)
-print(f"BM25: {bm25.getControl('c')}, {bm25.getControl('bm25.k_1')}, {bm25.getControl('bm25.k_3')}")
+# print(f"BM25: {bm25.getControl('c')}, {bm25.getControl('bm25.k_1')}, {bm25.getControl('bm25.k_3')}")
 
 # Evaluating ===================================================================
 qrels = dataset.get_qrels()
