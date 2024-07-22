@@ -1,8 +1,8 @@
 # Initialing ===================================================================
 import pyterrier as pt
+
 if not pt.started():
     pt.init()
-
 
 # Loading TREC dataset =========================================================
 dataset = pt.datasets.get_dataset("irds:beir/trec-covid")
@@ -11,6 +11,7 @@ dataset.get_topics().head()
 
 # Indexing using pyterrier =====================================================
 import os
+
 pt_index_path = './indices/cord19'
 
 if not os.path.exists(pt_index_path + "/data.properties"):
@@ -24,18 +25,25 @@ else:
 
 index = pt.IndexFactory.of(index_ref)
 
-
 # Runnnig BM25 Retriever =======================================================
-bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25")
 topics = dataset.get_topics('query')
+qrels = dataset.get_qrels()
 
-res = bm25.transform(topics)
-res
+# BM25 control configuration_1 ========================================================================================
+# bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
+# BM25 control configuration_2 ========================================================================================
+bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.3, "bm25.k_1": 1.2, "bm25.k_3": 20})
+
+# TF_IDF = pt.BatchRetrieve(index_ref, wmodel="TF_IDF")
+# PL2 = pt.BatchRetrieve(index_ref, wmodel="PL2")
+# pipe = bm25 >> (TF_IDF ** PL2)
+
+res = bm25.transform(topics)    # change to pipe to enable the pipeline/chain for TF_IDF and PL2
 
 # Evaluating ===================================================================
 qrels = dataset.get_qrels()
 
-eval_metrics=['P_10', 'ndcg_cut_10', 'map']
+eval_metrics = ['P_10', 'ndcg_cut_10', 'map']
 exp_res = pt.Experiment(
     [bm25],
     topics,
@@ -43,24 +51,30 @@ exp_res = pt.Experiment(
     eval_metrics=eval_metrics,
 )
 exp_res
+print(f"baseline: {exp_res}")
 
-
-# Assignment Starts from here ==================================================
-# Re-ranking with MonoT5 =======================================================
+# Re-ranking with MonoT5 & DuoT5 =======================================================
 import pyterrier_t5
-from pyterrier_t5 import MonoT5ReRanker
+from pyterrier_t5 import MonoT5ReRanker, DuoT5ReRanker
 
 # Load the MonoT5 re-ranker
 monoT5 = pyterrier_t5.MonoT5ReRanker()
 
+# uncomment below line to enable duoT5 re-ranker
+# duoT5 = pyterrier_t5.DuoT5ReRanker()
+
 # Apply BM25 and then re-rank with MonoT5
 pipeline = bm25 >> pt.text.get_text(dataset, "text") >> monoT5
 
+# uncomment below line to enable duoT5 re-ranker
+# duo_pipeline = pipeline % 50 >> duoT5
+
 exp_res_reranked = pt.Experiment(
-    [pipeline],
+    [pipeline],     # change to duo_pipeline to enable duoT5 re-ranker. Choices [pipeline, duo_pipeline]
     topics,
     qrels,
     eval_metrics=eval_metrics,
 )
 
-print(exp_res_reranked)
+print("reranked: ", exp_res_reranked)
+
