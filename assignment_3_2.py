@@ -33,7 +33,9 @@ bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1
 pt.GridSearch(
     bm25,
     topics=dataset.get_topics('query'),
-    qrels=dataset.get_qrels())
+    qrels=dataset.get_qrels(),
+    "maps"
+)
 
 res = bm25.transform(topics)
 res
