@@ -1,8 +1,8 @@
 # Initialing ===================================================================
 import pyterrier as pt
+
 if not pt.started():
     pt.init()
-
 
 # Loading TREC dataset =========================================================
 dataset = pt.datasets.get_dataset("irds:beir/trec-covid")
@@ -11,6 +11,7 @@ dataset.get_topics().head()
 
 # Indexing using pyterrier =====================================================
 import os
+
 pt_index_path = './indices/cord19'
 
 if not os.path.exists(pt_index_path + "/data.properties"):
@@ -24,18 +25,15 @@ else:
 
 index = pt.IndexFactory.of(index_ref)
 
-
 # Runnnig BM25 Retriever =======================================================
+topics = dataset.get_topics('query')
+qrels = dataset.get_qrels()
+
 bm25 = pt.BatchRetrieve(index_ref, wmodel="BM25", controls={"c": 0.75, "bm25.k_1": 0.75, "bm25.k_3": 0.75})
 pt.GridSearch(
-    BM25,
-    {BM25 : {"c" : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ],
-             "bm25.k_1" : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ],
-             "bm25.k_3" : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ]}},
-train_topics,
-train_qrels,
-"map")
-topics = dataset.get_topics('query')
+    bm25,
+    topics=dataset.get_topics('query'),
+    querlse=dataset.get_qrels())
 
 res = bm25.transform(topics)
 res
@@ -43,7 +41,7 @@ res
 # Evaluating ===================================================================
 qrels = dataset.get_qrels()
 
-eval_metrics=['P_10', 'ndcg_cut_10', 'map']
+eval_metrics = ['P_10', 'ndcg_cut_10', 'map']
 exp_res = pt.Experiment(
     [bm25],
     topics,
@@ -51,7 +49,6 @@ exp_res = pt.Experiment(
     eval_metrics=eval_metrics,
 )
 exp_res
-
 
 # Assignment Starts from here ==================================================
 # Re-ranking with MonoT5 =======================================================
