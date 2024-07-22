@@ -34,7 +34,7 @@ pt.GridSearch(
     bm25,
     topics=dataset.get_topics('query'),
     qrels=dataset.get_qrels(),
-    "maps"
+    params= "maps"
 )
 
 res = bm25.transform(topics)
