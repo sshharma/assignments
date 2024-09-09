@@ -130,13 +130,15 @@ def main():
     plt.show()
 
     all_points = df.values                              # Convert the dataframe to a numpy array
+    print(f'Original data: {all_points}')
 
-    # all_points = z_score_normalize(all_points)          # Normalize the data using z-score normalization
-    # print(f'Normalized data: {all_points}')
+    all_points = z_score_normalize(all_points)          # Normalize the data using z-score normalization
+    print(f'Normalized data: {all_points}')
+
     # Run the customized k-means algorithm
-    centroids, c = custom_kmeans(all_points, args.k, args.max_iters)
-    print(f'Final centroids: {centroids}')
-    plot_graph(centroids, c, all_points)
+    # centroids, c = custom_kmeans(all_points, args.k, args.max_iters)
+    # print(f'Final centroids: {centroids}')
+    # plot_graph(centroids, c, all_points)
 
 
 if __name__ == '__main__':
