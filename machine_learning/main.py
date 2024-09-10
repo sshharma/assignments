@@ -119,26 +119,26 @@ def main():
     parser.add_argument('--train_dir', type=str, help='data file', default='data/kmtest.csv')
     parser.add_argument('--k', type=int, help='number of clusters', default=2)
     parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=5)
+    parser.add_argument('--normalize', type=bool, help='normalize the data points', default=False)
     args = parser.parse_args()
 
-
+    # read the data from the file
     df = pd.read_csv(args.train_dir, header=None)  # (19, 2)
     # print(f'shape of the data: {df.shape}')
 
-    # use first column as x-axis and second column as y-axis
+    # use first column as x-axis and second column as y-axis to plot the initial data points
     plt.scatter(df.iloc[:, 0], df.iloc[:, 1])
     plt.show()
 
-    all_points = df.values                              # Convert the dataframe to a numpy array
-    print(f'Original data: {all_points}')
+    all_points = df.values                            # Convert the dataframe to a numpy array
 
-    all_points = z_score_normalize(all_points)          # Normalize the data using z-score normalization
-    print(f'Normalized data: {all_points}')
+    if args.normalize:
+        all_points = z_score_normalize(all_points)    # Normalize the data points
 
     # Run the customized k-means algorithm
-    # centroids, c = custom_kmeans(all_points, args.k, args.max_iters)
-    # print(f'Final centroids: {centroids}')
-    # plot_graph(centroids, c, all_points)
+    centroids, c = custom_kmeans(all_points, args.k, args.max_iters)
+    print(f'Final centroids: {centroids}')
+    plot_graph(centroids, c, all_points)
 
 
 if __name__ == '__main__':
