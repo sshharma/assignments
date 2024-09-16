@@ -117,7 +117,7 @@ def main():
     # read the data from command line
     parser = argparse.ArgumentParser(description='K-Means Clustering Algorithm')
     parser.add_argument('--train_dir', type=str, help='data file', default='data/kmtest.csv')
-    parser.add_argument('--k', type=int, help='number of clusters', default=6)
+    parser.add_argument('--k', type=int, help='number of clusters', default=4)
     parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=50)
     parser.add_argument('--normalize', help='normalize the data', action='store_true')
     args = parser.parse_args()
