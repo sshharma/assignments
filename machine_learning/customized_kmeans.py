@@ -66,11 +66,11 @@ def initialize_centroids(k):
 
 def custom_kmeans(points, k, max_iters):
     # initialize the centroids randomly
-    # raw_centroids = points[np.random.choice(points.shape[0], k, replace=False)]
+    centroids = points[np.random.choice(points.shape[0], k, replace=False)]
 
     # chosen centroids manually, that are far apart from each other
-    centroids = initialize_centroids(k)
-
+    # centroids = initialize_centroids(k)
+    print(f'Initial centroids: {centroids}')
     last_centroids = centroids
     # Run the k-means algorithm for a maximum of max_iters iterations
     for i in range(max_iters):
@@ -117,9 +117,9 @@ def main():
     # read the data from command line
     parser = argparse.ArgumentParser(description='K-Means Clustering Algorithm')
     parser.add_argument('--train_dir', type=str, help='data file', default='data/kmtest.csv')
-    parser.add_argument('--k', type=int, help='number of clusters', default=2)
-    parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=5)
-    parser.add_argument('--normalize', type=bool, help='normalize the data points', default=False)
+    parser.add_argument('--k', type=int, help='number of clusters', default=6)
+    parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=50)
+    parser.add_argument('--normalize', help='normalize the data', action='store_true')
     args = parser.parse_args()
 
     # read the data from the file
