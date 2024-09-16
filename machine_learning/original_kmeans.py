@@ -18,16 +18,17 @@ def z_score_normalize(data):
     """
     mean = np.mean(data, axis=0)
     std = np.std(data, axis=0)
-    return (data - mean) / std
+    std_replaced = np.where(std == 0, 1, std)                       # Replace 0 with 1 to avoid division by zero
+    return (data - mean) / std_replaced
 
 
 
 def main():
     parser = argparse.ArgumentParser(description='K-Means Clustering Algorithm')
-    parser.add_argument('--train_dir', type=str, help='data file', default='data/kmtest.csv')
-    parser.add_argument('--k', type=int, help='number of clusters', default=4)
-    parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=50)
-    parser.add_argument('--normalize', action='store_true', help='normalize the data')
+    parser.add_argument('--train_dir', type=str, help='Data file', default='data/kmtest.csv')
+    parser.add_argument('--k', type=int, help='Number of clusters', default=4)
+    parser.add_argument('--max_iters', type=int, help='Maximum number of iterations', default=50)
+    parser.add_argument('--random_state', type=int, help='Random state for initialization', default=42)
     args = parser.parse_args()
 
     # read the data from the file
@@ -39,12 +40,10 @@ def main():
     plt.show()
 
     all_points = df.values
-
-    if args.normalize:
-        all_points = z_score_normalize(all_points)    # Normalize the data points
+    all_points = z_score_normalize(all_points)    # Normalize the data points
 
     # Running the original k-means algorithm
-    kmeans = KMeans(n_clusters=args.k, max_iter=args.max_iters)
+    kmeans = KMeans(n_clusters=args.k, max_iter=args.max_iters, random_state=args.random_state)
     kmeans.fit(all_points)
     centroids = kmeans.cluster_centers_
     labels = kmeans.labels_
