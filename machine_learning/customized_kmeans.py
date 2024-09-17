@@ -66,11 +66,11 @@ def initialize_centroids(k):
 
 def custom_kmeans(points, k, max_iters):
     # initialize the centroids randomly
-    # raw_centroids = points[np.random.choice(points.shape[0], k, replace=False)]
+    centroids = points[np.random.choice(points.shape[0], k, replace=False)]
 
     # chosen centroids manually, that are far apart from each other
-    centroids = initialize_centroids(k)
-
+    # centroids = initialize_centroids(k)
+    print(f'Initial centroids: {centroids}')
     last_centroids = centroids
     # Run the k-means algorithm for a maximum of max_iters iterations
     for i in range(max_iters):
@@ -117,22 +117,24 @@ def main():
     # read the data from command line
     parser = argparse.ArgumentParser(description='K-Means Clustering Algorithm')
     parser.add_argument('--train_dir', type=str, help='data file', default='data/kmtest.csv')
-    parser.add_argument('--k', type=int, help='number of clusters', default=2)
-    parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=5)
+    parser.add_argument('--k', type=int, help='number of clusters', default=4)
+    parser.add_argument('--max_iters', type=int, help='maximum number of iterations', default=50)
+    parser.add_argument('--normalize', help='normalize the data', action='store_true')
     args = parser.parse_args()
 
-
+    # read the data from the file
     df = pd.read_csv(args.train_dir, header=None)  # (19, 2)
     # print(f'shape of the data: {df.shape}')
 
-    # use first column as x-axis and second column as y-axis
+    # use first column as x-axis and second column as y-axis to plot the initial data points
     plt.scatter(df.iloc[:, 0], df.iloc[:, 1])
     plt.show()
 
-    all_points = df.values                              # Convert the dataframe to a numpy array
+    all_points = df.values                            # Convert the dataframe to a numpy array
 
-    # all_points = z_score_normalize(all_points)          # Normalize the data using z-score normalization
-    # print(f'Normalized data: {all_points}')
+    if args.normalize:
+        all_points = z_score_normalize(all_points)    # Normalize the data points
+
     # Run the customized k-means algorithm
     centroids, c = custom_kmeans(all_points, args.k, args.max_iters)
     print(f'Final centroids: {centroids}')
