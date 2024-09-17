@@ -32,8 +32,7 @@ def main():
     args = parser.parse_args()
 
     # read the data from the file
-    df = pd.read_csv(args.train_dir, header=None)  # (19, 2)
-    # print(f'shape of the data: {df.shape}')
+    df = pd.read_csv(args.train_dir, header=None)
 
     # use first column as x-axis and second column as y-axis to plot the initial data points
     plt.scatter(df.iloc[:, 0], df.iloc[:, 1])
