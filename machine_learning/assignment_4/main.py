@@ -78,7 +78,7 @@ def main():
     os.makedirs('saved_models', exist_ok=True)
 
     # Save the model
-    torch.save(model.state_dict(), model_filepath)
+    # torch.save(model.state_dict(), model_filepath)
 
     # Evaluate the model
     cm, accuracy, sensitivity, specificity = evaluate_model(model, dataloaders, device)

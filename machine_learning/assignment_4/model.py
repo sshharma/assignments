@@ -10,8 +10,8 @@ def get_model():
     model = resnet50(weights=weights)
 
     # Uncomment the below lines if you wish to freeze the model's layers, considering the smaller dataset
-    # for param in model.parameters():
-    #     param.requires_grad = False
+    for param in model.parameters():
+        param.requires_grad = False
 
     # Modify the final layer to output 2 classes
     num_ftrs = model.fc.in_features
