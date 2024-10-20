@@ -8,7 +8,7 @@ import multiprocessing
 from multiprocessing import Lock
 
 def run_training(args_tuple):
-    lr, bs, epochs, gpu_id, lock = args_tuple
+    lr, bs, epochs, gpu_id = args_tuple
 
     # Build the command to run main.py
     command = [
