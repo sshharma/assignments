@@ -14,7 +14,7 @@ from utils import save_results
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='DR vs NonDR Classification')
-    parser.add_argument('--learning_rate', type=float, default= , help='Learning rate')
+    parser.add_argument('--learning_rate', type=float, default= 0.0005 , help='Learning rate')
     parser.add_argument('--batch_size', type=int, default= 32 , help='Minibatch size')
     parser.add_argument('--max_epochs', type=int, default= 10, help='Number of epochs')
     parser.add_argument('--data_dir', type=str, default='DS_IDRID/', help='Path to the dataset directory')
