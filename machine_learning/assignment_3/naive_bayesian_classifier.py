@@ -1,11 +1,9 @@
 """
 Name: Sachin Sharma
-KSUID: 0011
+KSUID: 001145317
 Project: 3
 Title: Naive Bayesian Classifier
 """
-
-
 
 import argparse
 import numpy as np
@@ -40,7 +38,7 @@ class NaiveBayesClassifier:
             self.var[cls] = X_c.var(axis=0) + 1e-9  # Add small value to prevent division by zero
             self.priors[cls] = X_c.shape[0] / n_samples
 
-    def _calculate_likelihood(self, cls, x)-> np.ndarray:
+    def _calculate_likelihood(self, cls, x)-> float:
         """
         ToDo 2A: Calculate the likelihood of the features given the class i.e. P(x|y)
         :param cls: class
@@ -49,10 +47,10 @@ class NaiveBayesClassifier:
         """
         mean = self.mean[cls]
         var = self.var[cls]
-        numerator = np.exp(- (x - mean) ** 2 / (2 * var))
-        denominator = np.sqrt(2 * np.pi * var)
-        likelihood = numerator / denominator
-        return likelihood.prod()
+        log_numerator = - (x - mean) ** 2 / (2 * var)
+        log_denominator = -0.5 * np.log(2 * np.pi * var)
+        log_likelihood = log_numerator + log_denominator
+        return log_likelihood.sum()
 
     def _calculate_posterior(self, x)-> dict:
         """
@@ -63,14 +61,13 @@ class NaiveBayesClassifier:
         posteriors = {}
         for cls in self.classes:
             prior = np.log(self.priors[cls])
-            # Calculate likelihood of the features                          -- added small value to prevent log(0)
-            likelihood = np.sum(np.log(self._calculate_likelihood(cls, x) + 1e-9))
-            posteriors[cls] = prior + likelihood
+            log_likelihood = self._calculate_likelihood(cls, x)
+            posteriors[cls] = prior + log_likelihood
         return posteriors
 
     def predict(self, x)-> np.ndarray:
         """
-        Predict the class labels for the provided data.
+        ToDo 3: Predict the class labels for the provided data.
         :param x: features
         :return: class labels
         """
@@ -80,12 +77,39 @@ class NaiveBayesClassifier:
             y_pred.append(max(posteriors, key=posteriors.get))
         return np.array(y_pred)
 
+    def predict_proba(self, X) -> np.ndarray:
+        """
+        Predict the probabilities of the positive class for the provided data.
+        :param self:
+        :param X:
+        :return:
+        """
+        proba = []
+        for _, x in X.iterrows():
+            posteriors = self._calculate_posterior(x)
+            # Convert log probabilities back to normal scale
+            total = np.exp(list(posteriors.values())).sum()
+            probs = {cls: np.exp(posteriors[cls]) / total for cls in self.classes}
+            proba.append(probs[1])  # Probability of positive class
+        return np.array(proba)
 
 
 def accuracy(y_true, y_pred)-> float:
+    """
+    Calculate the accuracy of the classifier.
+    :param y_true: true labels
+    :param y_pred: predicted labels
+    :return: accuracy
+    """
     return np.mean(y_true == y_pred)
 
 def confusion_matrix(y_true, y_pred)-> pd.DataFrame:
+    """
+    Calculate the confusion matrix with the labels.
+    :param y_true: true labels
+    :param y_pred: predicted labels
+    :return: confusion matrix
+    """
     classes = np.unique(y_true)
     matrix = pd.DataFrame(
         np.zeros((len(classes), len(classes)), dtype=int),
@@ -97,6 +121,12 @@ def confusion_matrix(y_true, y_pred)-> pd.DataFrame:
 
 
 def stratified_k_fold_cross_validation(data, k=5)-> list:
+    """
+    ToDo 5A: Perform stratified k-fold cross-validation (Default k=5)
+    :param data: data to be split
+    :param k: number of folds (Default 5, can be customized)
+    :return: list of folds
+    """
     # Separate data by class
     data_pos = data[data['label'] == 1]
     data_neg = data[data['label'] == -1]
@@ -116,22 +146,6 @@ def stratified_k_fold_cross_validation(data, k=5)-> list:
         folds.append(fold.sample(frac=1, random_state=42).reset_index(drop=True))
     return folds
 
-def predict_proba(self, X)-> np.ndarray:
-    """
-    ToDo 3: Predict the probabilities of the positive class for the provided data.
-    :param self:
-    :param X:
-    :return:
-    """
-    proba = []
-    for _, x in X.iterrows():
-        posteriors = self._calculate_posterior(x)
-        # Convert log probabilities back to normal scale
-        total = np.exp(list(posteriors.values())).sum()
-        probs = {cls: np.exp(posteriors[cls])/total for cls in self.classes}
-        proba.append(probs[1])  # Probability of positive class
-    return np.array(proba)
-
 
 def train_test_split_custom(data, test_size=0.3, random_state=42)-> tuple:
     """
@@ -141,20 +155,31 @@ def train_test_split_custom(data, test_size=0.3, random_state=42)-> tuple:
     :param random_state: random seed for reproducibility (Default 42, can be customized)
     :return: training and testing sets
     """
+    # Separate data by class
+    data_pos = data[data['label'] == 1]
+    data_neg = data[data['label'] == -1]
+
     # Shuffle the data
-    data = data.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    data_pos = data_pos.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    data_neg = data_neg.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
     # Calculate split index
-    split_idx = int(len(data) * (1 - test_size))
+    split_idx_pos = int(len(data_pos) * (1 - test_size))
+    split_idx_neg = int(len(data_neg) * (1 - test_size))
 
     # Split the data
-    train_data = data[:split_idx]
-    test_data = data[split_idx:]
+    train_data = pd.concat([data_pos[:split_idx_pos], data_neg[:split_idx_neg]], ignore_index=True)
+    test_data = pd.concat([data_pos[split_idx_pos:], data_neg[split_idx_neg:]], ignore_index=True)
+
+    # Shuffle the combined data
+    train_data = train_data.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    test_data = test_data.sample(frac=1, random_state=random_state).reset_index(drop=True)
 
     X_train = train_data.iloc[:, :-1]
     y_train = train_data.iloc[:, -1]
     X_test = test_data.iloc[:, :-1]
     y_test = test_data.iloc[:, -1]
+
 
     return X_train, X_test, y_train, y_test
 
@@ -182,23 +207,24 @@ def main()-> None:
     # Predict on the test set
     y_pred = nb_classifier.predict(X_test)
 
-    # Calculate accuracy
+    # ToDo 4A: Calculate and Print Accuracy
     test_accuracy = accuracy(y_test, y_pred)
     print(f"Test Accuracy: {test_accuracy:.4f}")
 
-    # Generate confusion matrix
+    # ToDo 4B: Calculate and Print Confusion Matrix
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:")
     print(conf_matrix)
 
-    # Perform 5-fold cross-validation
+    # ToDo 5A: Perform stratified k-fold cross-validation (Default k=5)
     folds = stratified_k_fold_cross_validation(data, k=5)
 
     accuracies = []
     confusion_matrices = []
 
+    # ToDo 5B: Training one naïve Bayesian classifier for each fold.
     for i in tqdm(range(5), desc='Cross Validation: '):
-        # Prepare training and validation data
+        # ToDo 5C: Prepare training and validation data using all but the ith fold
         test_fold = folds[i]
         train_folds = [folds[j] for j in range(5) if j != i]
         train_data = pd.concat(train_folds, ignore_index=True)
@@ -212,26 +238,24 @@ def main()-> None:
         nb_classifier_cv = NaiveBayesClassifier()
         nb_classifier_cv.fit(X_train_cv, y_train_cv)
 
-        # Predict on the validation set
+        # ToDo 5D: Evaluating Using Only the i-th Fold
         y_pred_cv = nb_classifier_cv.predict(X_test_cv)
 
-        # Calculate accuracy
+        # ToDo 6A: Calculate the accuracy for each fold
         accuracy_cv = accuracy(y_test_cv, y_pred_cv)
         accuracies.append(accuracy_cv)
 
-        # Generate confusion matrix
+        # ToDo 6B: Calculate the confusion matrix for each fold
         conf_matrix_cv = confusion_matrix(y_test_cv, y_pred_cv)
         confusion_matrices.append(conf_matrix_cv)
 
+        # ToDo 6C: Print the accuracy and confusion matrix for each fold
         print(f"Fold {i + 1} Accuracy: {accuracy_cv:.4f}")
         print(f"Fold {i + 1} Confusion Matrix:")
         print(conf_matrix_cv)
         print("\n")
 
-    # Add the method to our classifier
-    NaiveBayesClassifier.predict_proba = predict_proba
-
-    # Use the classifier from the first fold
+    # Use the classifier to predict the probabilities of the positive class
     nb_classifier_cv = NaiveBayesClassifier()
     nb_classifier_cv.fit(X_train_cv, y_train_cv)
     y_scores = nb_classifier_cv.predict_proba(X_test_cv)
@@ -240,7 +264,7 @@ def main()-> None:
     fpr, tpr, _ = roc_curve(y_test_cv.replace({-1: 0}), y_scores)
     roc_auc = auc(fpr, tpr)
 
-    # Plot ROC curve
+    # ToDo 7: Plot the ROC for one of the runs.
     plt.figure()
     plt.plot(fpr, tpr, color='darkorange',
              label=f'ROC curve (area = {roc_auc:.2f})')
