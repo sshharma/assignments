@@ -62,8 +62,6 @@ def main():
         df = pd.DataFrame(columns=headers)
         df.to_csv(results_file, index=False)
 
-    # Create a multiprocessing lock
-    lock = Lock()
 
     # Assign GPUs in a round-robin fashion
     num_gpus = 2  # Adjust based on the number of GPUs available
@@ -73,7 +71,7 @@ def main():
     args_list = []
     for idx, (lr, bs, epochs) in enumerate(hyperparameter_combinations):
         gpu_id = gpu_ids[idx % num_gpus]
-        args_tuple = (lr, bs, epochs, gpu_id, lock)
+        args_tuple = (lr, bs, epochs, gpu_id)
         args_list.append(args_tuple)
 
     # Create a pool of worker processes
