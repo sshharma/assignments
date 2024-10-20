@@ -5,7 +5,6 @@ import time
 import os
 import pandas as pd
 import multiprocessing
-from multiprocessing import Lock
 
 def run_training(args_tuple):
     lr, bs, epochs, gpu_id = args_tuple
@@ -32,11 +31,6 @@ def run_training(args_tuple):
 
     # Reading the latest result and logging (optional)
     # Acquiring lock before accessing shared resources
-    with lock:
-        df = pd.read_csv('results.csv')
-        latest_result = df.iloc[-1]
-        print("Latest Result:")
-        print(latest_result)
 
 def main():
     # Define ranges for hyperparameters
