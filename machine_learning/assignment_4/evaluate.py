@@ -1,4 +1,11 @@
-# evaluate.py
+"""
+Name: Sachin Sharma
+KSUID: 001145317
+Project: 3
+Title: Deep Learning for Classification
+"""
+
+
 import torch
 from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score
 

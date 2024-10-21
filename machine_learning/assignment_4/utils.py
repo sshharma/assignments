@@ -1,8 +1,12 @@
-# utils.py
+"""
+Name: Sachin Sharma
+KSUID: 001145317
+Project: 3
+Title: Deep Learning for Classification
+"""
+
 import csv
 import os
-
-# utils.py
 from filelock import FileLock
 
 def save_results(csv_file, params, metrics):

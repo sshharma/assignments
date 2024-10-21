@@ -1,4 +1,11 @@
-# train.py
+"""
+Name: Sachin Sharma
+KSUID: 001145317
+Project: 3
+Title: Deep Learning for Classification
+"""
+
+
 import torch
 import torch.nn as nn
 import torch.optim as optim

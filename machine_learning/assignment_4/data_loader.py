@@ -1,4 +1,11 @@
-# data_loader.py
+"""
+Name: Sachin Sharma
+KSUID: 001145317
+Project: 3
+Title: Deep Learning for Classification
+"""
+
+
 import os
 from torch.utils.data import Dataset
 from PIL import Image

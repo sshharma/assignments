@@ -1,4 +1,10 @@
-# Imports
+"""
+Name: Sachin Sharma
+KSUID: 001145317
+Project: 3
+Title: Deep Learning for Classification
+"""
+
 import argparse
 import os
 
