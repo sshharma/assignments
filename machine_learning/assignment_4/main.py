@@ -51,7 +51,7 @@ def main():
         ]),
     }
 
-    device = torch.device(f'cuda:{args.gpu_id}' if torch.cuda.is_available() else 'cpu')
+    device_name = '/GPU:0' if tf.config.list_physical_devices('GPU') else '/CPU:0'
     train_dir = os.path.join(args.data_dir, 'Train')
     test_dir = os.path.join(args.data_dir, 'Test')
 

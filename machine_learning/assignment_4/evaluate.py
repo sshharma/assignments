@@ -19,6 +19,11 @@ def evaluate_model(model, dataloader, device):
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
+
+            probs = torch.softmax(outputs, dim=1)   # Get probabilities using softmax (assumes binary classification)
+            positive_probs = probs[:, 1]            # Extract probability for the positive class (index 1)
+            probs_list.extend(positive_probs.cpu().numpy())
+
             _, preds = torch.max(outputs, 1)
             preds_list.extend(preds.cpu().numpy())
             labels_list.extend(labels.cpu().numpy())
@@ -28,5 +33,22 @@ def evaluate_model(model, dataloader, device):
     accuracy = accuracy_score(labels_list, preds_list)
     sensitivity = recall_score(labels_list, preds_list)
     specificity = recall_score(labels_list, preds_list, pos_label=0)
+    
+    # Compute ROC curve and AUC
+    fpr, tpr, thresholds = roc_curve(labels_list, probs_list)
+    roc_auc = auc(fpr, tpr)
+
+    # Plot the ROC curve
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2,
+             label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic')
+    plt.legend(loc="lower right")
+    plt.show()
 
     return cm, accuracy, sensitivity, specificity
