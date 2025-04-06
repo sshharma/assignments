@@ -19,10 +19,10 @@ def run_training(args_tuple):
     # Build the command to run main.py
     command = [
         'python', 'main.py',
-        '--learning_rate', str(lr),
-        '--batch_size', str(bs),
-        '--max_epochs', str(epochs),
-        '--gpu_id', str(gpu_id)
+        '--learning-rate', str(lr),
+        '--batch-size', str(bs),
+        '--max-epochs', str(epochs),
+        '--gpu-id', str(gpu_id)
     ]
 
     start_time = time.time()
