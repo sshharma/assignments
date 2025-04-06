@@ -7,11 +7,12 @@ Title: Deep Learning for Classification
 
 
 import torch
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, roc_curve, auc
+import matplotlib.pyplot as plt
 
 def evaluate_model(model, dataloader, device):
     model.eval()
-    preds_list = []
+    preds_list, probs_list = [], []
     labels_list = []
 
     with torch.no_grad():

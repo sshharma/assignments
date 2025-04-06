@@ -1,7 +1,7 @@
 """
 Name: Sachin Sharma
 KSUID: 001145317
-Project: 3
+Project: 4
 Title: Deep Learning for Classification
 """
 
@@ -24,11 +24,12 @@ from utils import save_results
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='DR vs NonDR Classification')
-    parser.add_argument('--learning_rate', type=float, default= 0.0005 , help='Learning rate')
-    parser.add_argument('--batch_size', type=int, default= 32 , help='Minibatch size')
-    parser.add_argument('--max_epochs', type=int, default= 10, help='Number of epochs')
-    parser.add_argument('--data_dir', type=str, default='DS_IDRID/', help='Path to the dataset directory')
-    parser.add_argument('--gpu_id', type=int, default=0, help='GPU ID to use')
+    parser.add_argument('--learning-rate', type=float, default= 0.0005 , help='Learning rate')
+    parser.add_argument('--batch-size', type=int, default= 32 , help='Minibatch size')
+    parser.add_argument('--max-epochs', type=int, default= 10, help='Number of epochs')
+    parser.add_argument('--data-dir', type=str, default='DS_IDRID/', help='Path to the dataset directory')
+    parser.add_argument('--gpu-id', type=int, default=0, help='GPU ID to use')
+    parser.add_argument('--freeze-layers', action= 'store_true' ,help='Freeze layers')
     args = parser.parse_args()
 
     # Parameters
@@ -51,7 +52,7 @@ def main():
         ]),
     }
 
-    device_name = '/GPU:0' if tf.config.list_physical_devices('GPU') else '/CPU:0'
+    # device_name = '/GPU:0' if tf.config.list_physical_devices('GPU') else '/CPU:0'
     train_dir = os.path.join(args.data_dir, 'Train')
     test_dir = os.path.join(args.data_dir, 'Test')
 
@@ -70,7 +71,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Model, criterion, optimizer
-    model = get_model()
+    model = get_model(freeze= args.freeze_layers)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=params['learning_rate'])
 
