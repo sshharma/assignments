@@ -21,6 +21,17 @@ from train import train_model
 from evaluate import evaluate_model
 from utils import save_results
 
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='DR vs NonDR Classification')
@@ -30,6 +41,7 @@ def main():
     parser.add_argument('--data-dir', type=str, default='DS_IDRID/', help='Path to the dataset directory')
     parser.add_argument('--gpu-id', type=int, default=0, help='GPU ID to use')
     parser.add_argument('--freeze-layers', action= 'store_true' ,help='Freeze layers')
+    parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')
     args = parser.parse_args()
 
     # Parameters
@@ -83,8 +95,7 @@ def main():
     model_filename = f"resnet_lr{params['learning_rate']}_bs{params['batch_size']}_epochs{params['max_epochs']}_{timestamp}.pth"
     model_filepath = os.path.join('saved_models', model_filename)
 
-    # Create directory if it doesn't exist
-    os.makedirs('saved_models', exist_ok=True)
+    os.makedirs('saved_models', exist_ok=True)                      # Create directory if it doesn't exist
 
     # Save the model
     # torch.save(model.state_dict(), model_filepath)
