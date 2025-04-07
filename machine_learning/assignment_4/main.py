@@ -44,7 +44,7 @@ def main():
     parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')
     args = parser.parse_args()
 
-    # Parameters
+    set_seed(args.seed)                                                      # Set random seed for reproducibility
     params = {
         'learning_rate': args.learning_rate,
         'batch_size': args.batch_size,
