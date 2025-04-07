@@ -6,9 +6,12 @@ Title: Deep Learning for Classification
 """
 
 
+import time
 import torch
 from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, roc_curve, auc
 import matplotlib.pyplot as plt
+
+timestamp = time.strftime("%Y%m%d-%H%M%S")
 
 def evaluate_model(model, dataloader, device):
     model.eval()
@@ -50,6 +53,6 @@ def evaluate_model(model, dataloader, device):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic')
     plt.legend(loc="lower right")
-    plt.show()
+    plt.savefig(f'graphs/roc_curve_{timestamp}.png')
 
     return cm, accuracy, sensitivity, specificity
