@@ -15,9 +15,9 @@ def get_model(freeze=False):
     weights = ResNet50_Weights.DEFAULT
     model = resnet50(weights=weights)
 
-    # if freeze:
-    #     for param in model.parameters():                  # results of this run can be find in results.csv file
-    #         param.requires_grad = False
+    if freeze:
+        for param in model.parameters():                  # results of this run can be find in results.csv file
+            param.requires_grad = False
 
     # Modify the final layer to output 2 classes
     num_ftrs = model.fc.in_features
